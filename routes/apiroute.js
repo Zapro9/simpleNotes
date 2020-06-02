@@ -1,18 +1,26 @@
 var routes = require("express").Router();
-var store = require("../db/db.json");
+var store = require("db/db.json");
 
 routes.get("/notes", function (req, res) {
-
+   store
+    .getNotes()
+    .then(notes => res.json(notes))
+    .catch(err => res.status(500).json(err));
 
 });
 
 routes.post("/notes", (req, res) => {
-
-
+    store
+        .addNote(req.body)
+        .then((note) => res.json(note))
+        .catch(err => res.status(500).json(err));
 });
 
 routes.delete("/notes/:id", function (req, res) {
-
+    store
+    .removeNote(req.params.id)
+    .then(() => res.json({ok: true}))
+    .catch(err => res.status(500).json(err));
     
 });
 
