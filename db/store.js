@@ -1,10 +1,12 @@
 const util = require("util");
 const fs = require("fs");
-const uuidv1 = require("uuidv1");
+const uuidv1 = require("uuid/v1");
+
 const readFileAsync = util.promisify(fs.readFile);
-const writeFileAsync = util.promisify(fs.writeFile); 
+const writeFileAsync = util.promisify(fs.writeFile);
 
 class Store {
+
     read() {
         return readFileAsync("db/db.json", "utf8");
     }
@@ -13,32 +15,33 @@ class Store {
     }
     getNotes() {
         return this.read().then(notes => {
-            let parsedNotes
+            let parsedNotes;
             try {
-                parsedNotes = [].concat(JSON.parse(notes))
+                parsedNotes = [].concat(JSON.parse(notes));
             } catch (err) {
-                parsedNotes = []
+                parsedNotes = [];
             }
             return parsedNotes;
-        })
+        });
     }
     addNote(note) {
-        const {title, text} = note;
+        const { title, text } = note;
         if (!title || !text) {
-            throw new Error("Title and Text cannot be left empty!");
+            throw new Error(`You need to have a title and text!`)
         }
-    const newNote = {title, text, id: uuidv1()};
-    return this.getNotes()
 
-    .then(notes => [...notes, newNotes])
-    .then(updatedNotes => this.write(updatedNotes))
-    .then(() => newNote);
+        const newNote = { title, text, id: uuidv1() }
+
+        return this.getNotes().then(notes => [...notes, newNote])
+            .then(updatedNotes => this.write(updatedNotes))
+            .then(() => newNote)
+
     }
-    remoteNote(id) {
+    removeNote(id) {
         return this.getNotes()
-        .then(notes => notes.filter(note => note.id !== id ))
-        .then(filteredNotes => this.write(filteredNotes));
-
+            .then(notes => notes.filter(note => note.id !== id))
+            .then(filteredNotes => this.write(filteredNotes));
     }
 }
-module.exports = new Store();
+
+module.exports = new Store;
